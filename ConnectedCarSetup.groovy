@@ -354,11 +354,11 @@ def authPage() {
     state.accessToken = state.accessToken
   }
 
-  if(state.carvoyantAccessToken  && !isTokenRevoked()) //The tooken is valid, so the vehicle list page is returned
+  if(state.carvoyantAccessToken  && !isTokenRevoked()) //The token is valid, so the vehicle list page is returned
   {
     return buildVehicleListPage()
   } 
-  else //The tooken is not valid, so the auth page is returned
+  else //The token is not valid, so the auth page is returned
   {
     def redirectUrl = oauthInitUrl()
     log.debug "RedirectUrl = ${redirectUrl}"
@@ -461,11 +461,13 @@ def oauthInitUrl() {
     state: state.oauthInitState,
     redirect_uri: serverUrl + "/api/token/${state.accessToken}/smartapps/installations/${app.id}/receiveToken"
   ]
+  
+    log.debug "oauthInitUrl " + appSettings.carvoyantAuthUrl + "/OAuth/authorize?" + toQueryString(oauthParams)
 
   return appSettings.carvoyantAuthUrl + "/OAuth/authorize?" + toQueryString(oauthParams)
 }
 
-//This methode receives an auth code from Carvoyant and requests a Carvoyant access token
+//This method receives an auth code from Carvoyant and requests a Carvoyant access token
 def receiveToken() {
   def code = params.code
   def oauthState = params.state
@@ -475,7 +477,7 @@ def receiveToken() {
     code: params.code,
     client_id: appSettings.carvoyantClientId,
     client_secret: appSettings.carvoyantSecret,
-    redirect_uri: buildRedirectUrl()
+    redirect_uri: serverUrl + "/api/token/${state.accessToken}/smartapps/installations/${app.id}/receiveToken"
   ]
 
   def tokenUrl = appSettings.carvoyantApiUrl + "/oauth/token"
@@ -536,3 +538,5 @@ def refreshToken()
 def toQueryString(Map m) {
   return m.collect { k, v -> "${k}=${URLEncoder.encode(v.toString())}" }.sort().join("&")
 }
+
+def getServerUrl() { return "https://graph.api.smartthings.com" }
