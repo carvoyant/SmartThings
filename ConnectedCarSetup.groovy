@@ -38,6 +38,7 @@ definition(
 	appSetting "carvoyantSecret"
 	appSetting "carvoyantApiUrl"
 	appSetting "carvoyantAuthUrl"
+	appSetting "carvoyantTokenUrl"
 }
 
 
@@ -262,7 +263,7 @@ def deleteSubscription(subscriptionToDelete)
   log.debug "deleting ${subscriptionToDelete}"
   def subParams = 
   [
-    uri: appSettings.carvoyantApiUrl + "/api/vehicle/${subscriptionToDelete.vehicleId}/eventSubscription/${subscriptionToDelete.subscriptionId}",
+    uri: appSettings.carvoyantApiUrl + "/vehicle/${subscriptionToDelete.vehicleId}/eventSubscription/${subscriptionToDelete.subscriptionId}",
     headers: ["Content-Type": "text/json", "Authorization": "Bearer ${state.carvoyantAccessToken}"]
   ]
 
@@ -292,7 +293,7 @@ def createGeoFenceSubscription(selectedVehicle)
   {
 
     httpPostJson(
-    uri: appSettings.carvoyantApiUrl + "/api/vehicle/${selectedVehicle}/eventSubscription/geoFence/", 
+    uri: appSettings.carvoyantApiUrl + "/vehicle/${selectedVehicle}/eventSubscription/geoFence/", 
     path: '',  
     headers: ["Content-Type": "application/json", "Authorization": "Bearer ${state.carvoyantAccessToken}"], 
     body: body
@@ -328,7 +329,7 @@ def createIgnitionStatusSubscription(selectedVehicle)
   {
 
     httpPostJson(
-      uri: appSettings.carvoyantApiUrl + "/api/vehicle/${selectedVehicle}/eventSubscription/ignitionStatus/", 
+      uri: appSettings.carvoyantApiUrl + "/vehicle/${selectedVehicle}/eventSubscription/ignitionStatus/", 
       path: '',  
       headers: ["Content-Type": "application/json", "Authorization": "Bearer ${state.carvoyantAccessToken}"], 
       body: body
@@ -390,7 +391,7 @@ def isTokenRevoked()
 {
   log.debug "checking for revoked token"
   def reqParams = [
-    uri: appSettings.carvoyantApiUrl + "/api/account/",
+    uri: appSettings.carvoyantApiUrl + "/account/",
     headers: ["Content-Type": "text/json", "Authorization": "Bearer ${state.carvoyantAccessToken}"]
   ]
 
@@ -431,7 +432,7 @@ def buildVehicleListPage()
 //returns the list of vehicles from the user's Carvoyant account
 def getVehicles() {
   def deviceListParams = [
-    uri: appSettings.carvoyantApiUrl + "/api/vehicle/",
+    uri: appSettings.carvoyantApiUrl + "/vehicle/",
     headers: ["Content-Type": "text/json", "Authorization": "Bearer ${state.carvoyantAccessToken}"]
   ]
 
@@ -493,7 +494,7 @@ def receiveToken() {
     redirect_uri: serverUrl + "/api/token/${state.accessToken}/smartapps/installations/${app.id}/receiveToken"
   ]
 
-  def tokenUrl = appSettings.carvoyantApiUrl + "/oauth/token"
+  def tokenUrl = appSettings.carvoyantTokenUrl
 
   def jsonMap
   try 
@@ -528,7 +529,7 @@ def refreshToken()
   try
   {
     def userPass = appSettings.carvoyantClientId + ":" + appSettings.carvoyantSecret 
-    httpPostJson(uri: appSettings.carvoyantApiUrl + "/oauth/token", headers: ["Authorization": "Basic " + userPass.encodeAsBase64().toString(), "Content-Type":"application/x-www-form-urlencoded"], body: toQueryString(body)) 
+    httpPostJson(uri: appSettings.carvoyantTokenUrl, headers: ["Authorization": "Basic " + userPass.encodeAsBase64().toString(), "Content-Type":"application/x-www-form-urlencoded"], body: toQueryString(body)) 
     {
       response ->
 
